@@ -1,0 +1,140 @@
+// Single-file React e-commerce store // TailwindCSS utility classes assumed to be available. // Uses shadcn/ui components optionally (not required) but written to work with plain React + Tailwind. // Features: // - Product grid with sample products // - Cart drawer with add/remove/quantity // - Simple checkout form (client-side only) and order summary // - Responsive layout // How to use: // - Drop this component into a React app (Create React App, Vite, Next.js page) where Tailwind is configured. // - Replace sampleProducts with your real product data or fetch from an API.
+
+import React, { useState } from 'react';
+
+const sampleProducts = [ { id: 'p1', name: 'محصول شماره ۱', price: 199000, desc: 'توضیح کوتاه درباره محصول اول. کیفیت بالا و ارسال سریع.', image: 'https://images.unsplash.com/photo-1600180758890-2d4f9d7a9f2f?auto=format&fit=crop&w=800&q=60' }, { id: 'p2', name: 'محصول شماره ۲', price: 349000, desc: 'محصولی محبوب با طراحی مدرن.', image: 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=800&q=60' }, { id: 'p3', name: 'محصول شماره ۳', price: 89000, desc: 'گزینه اقتصادی با کیفیت مطلوب.', image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=60' } ];
+
+function formatToman(n) { return n.toLocaleString('fa-IR') + ' تومان'; }
+
+export default function StoreApp() { const [products] = useState(sampleProducts); const [cart, setCart] = useState({}); // {productId: qty} const [isCartOpen, setCartOpen] = useState(false); const [checkoutOpen, setCheckoutOpen] = useState(false); const [customer, setCustomer] = useState({ name: '', phone: '', address: '' });
+
+const addToCart = (id) => { setCart(prev => ({ ...prev, [id]: (prev[id] || 0) + 1 })); };
+
+const removeFromCart = (id) => { setCart(prev => { const next = { ...prev }; delete next[id]; return next; }); };
+
+const changeQty = (id, qty) => { if (qty <= 0) return removeFromCart(id); setCart(prev => ({ ...prev, [id]: qty })); };
+
+const cartItems = Object.entries(cart).map(([id, qty]) => { const prod = products.find(p => p.id === id); return { ...prod, qty }; });
+
+const subtotal = cartItems.reduce((s, it) => s + it.price * it.qty, 0); const shipping = subtotal > 0 ? 20000 : 0; const total = subtotal + shipping;
+
+const handleCheckout = (e) => { e.preventDefault(); // In production: send order to backend / payment gateway const order = { customer, items: cartItems, subtotal, shipping, total, createdAt: new Date().toISOString() }; console.log('ORDER (simulate send):', order); alert('سفارش شما ثبت شد — این یک شبیه‌سازی است. در نسخه نهایی به درگاه متصل خواهد شد.'); setCart({}); setCheckoutOpen(false); setCartOpen(false); setCustomer({ name: '', phone: '', address: '' }); };
+
+return ( <div className="min-h-screen bg-gray-50 text-gray-800"> <header className="bg-white shadow-sm"> <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between"> <h1 className="text-2xl font-bold">نام فروشگاه شما</h1> <div className="flex items-center gap-4"> <button onClick={() => setCartOpen(true)} className="relative inline-flex items-center gap-2 px-3 py-2 bg-indigo-600 text-white rounded-md hover:opacity-95" > سبد ({Object.values(cart).reduce((a,b)=>a+b,0)}) </button> </div> </div> </header>
+
+<main className="max-w-6xl mx-auto px-4 py-8">
+    <section>
+      <h2 className="text-xl font-semibold mb-4">محصولات</h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {products.map(p => (
+          <article key={p.id} className="bg-white rounded-2xl shadow p-4 flex flex-col">
+            <img src={p.image} alt={p.name} className="h-44 w-full object-cover rounded-md mb-4" />
+            <h3 className="font-semibold">{p.name}</h3>
+            <p className="text-sm text-gray-500 my-2">{p.desc}</p>
+            <div className="mt-auto flex items-center justify-between">
+              <strong className="text-lg">{formatToman(p.price)}</strong>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => addToCart(p.id)}
+                  className="px-3 py-1 border rounded-md hover:bg-gray-100"
+                >افزودن</button>
+                <button
+                  onClick={() => alert('صفحه جزئیات محصول در نسخه کامل ساخته می‌شود')}
+                  className="px-3 py-1 text-sm text-gray-600"
+                >جزئیات</button>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+  </main>
+
+  {/* Cart Drawer */}
+  <div className={`fixed inset-0 z-40 transition-opacity ${isCartOpen ? 'pointer-events-auto' : 'pointer-events-none'}`} aria-hidden={!isCartOpen}>
+    <div className={`fixed inset-0 bg-black/40 ${isCartOpen ? 'opacity-100' : 'opacity-0'}`} onClick={() => setCartOpen(false)} />
+    <aside className={`fixed right-0 top-0 h-full w-full sm:w-96 bg-white shadow-xl transform transition-transform ${isCartOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+      <div className="p-4 flex items-center justify-between border-b">
+        <h3 className="text-lg font-semibold">سبد خرید</h3>
+        <div className="flex items-center gap-2">
+          <button onClick={() => { setCart({}); }} className="text-sm text-red-600">پاک کردن</button>
+          <button onClick={() => setCartOpen(false)} className="px-2 py-1 bg-gray-100 rounded">بستن</button>
+        </div>
+      </div>
+      <div className="p-4 overflow-y-auto h-[70vh]">
+        {cartItems.length === 0 ? (
+          <div className="text-center text-gray-500">سبد خالی است</div>
+        ) : (
+          <ul className="flex flex-col gap-4">
+            {cartItems.map(it => (
+              <li key={it.id} className="flex gap-3 items-center">
+                <img src={it.image} alt={it.name} className="w-16 h-16 object-cover rounded" />
+                <div className="flex-1">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <div className="font-medium">{it.name}</div>
+                      <div className="text-sm text-gray-500">{formatToman(it.price)}</div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button onClick={() => changeQty(it.id, it.qty - 1)} className="px-2 py-1 border rounded">−</button>
+                      <div className="w-8 text-center">{it.qty}</div>
+                      <button onClick={() => changeQty(it.id, it.qty + 1)} className="px-2 py-1 border rounded">+</button>
+                    </div>
+                  </div>
+                  <div className="text-sm text-gray-600 mt-1">جمع: {formatToman(it.price * it.qty)}</div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      <div className="p-4 border-t">
+        <div className="flex justify-between mb-2"><span>جمع</span><span>{formatToman(subtotal)}</span></div>
+        <div className="flex justify-between mb-2"><span>هزینه ارسال</span><span>{formatToman(shipping)}</span></div>
+        <div className="flex justify-between font-semibold text-lg mb-4"><span>قابل پرداخت</span><span>{formatToman(total)}</span></div>
+        <div className="flex gap-2">
+          <button disabled={cartItems.length===0} onClick={() => setCheckoutOpen(true)} className="flex-1 px-4 py-2 bg-green-600 text-white rounded disabled:opacity-60">پرداخت</button>
+          <button onClick={() => alert('درگاه پرداخت به نسخه نهایی اضافه می‌شود')} className="px-4 py-2 border rounded">روش‌های پرداخت</button>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  {/* Checkout Modal (simple) */}
+  {checkoutOpen && (
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div className="fixed inset-0 bg-black/50" onClick={() => setCheckoutOpen(false)} />
+      <form onSubmit={handleCheckout} className="bg-white rounded-lg shadow-lg p-6 z-10 w-full max-w-md">
+        <h3 className="text-lg font-semibold mb-4">اطلاعات تحویل</h3>
+        <div className="flex flex-col gap-3">
+          <input required value={customer.name} onChange={e=>setCustomer(c=>({...c, name:e.target.value}))} placeholder="نام و نام خانوادگی" className="input p-2 border rounded" />
+          <input required value={customer.phone} onChange={e=>setCustomer(c=>({...c, phone:e.target.value}))} placeholder="تلفن" className="input p-2 border rounded" />
+          <textarea required value={customer.address} onChange={e=>setCustomer(c=>({...c, address:e.target.value}))} placeholder="آدرس تحویل" className="input p-2 border rounded" />
+
+          <div className="flex justify-between">
+            <div>جمع</div>
+            <div>{formatToman(subtotal)}</div>
+          </div>
+          <div className="flex justify-between">
+            <div>ارسال</div>
+            <div>{formatToman(shipping)}</div>
+          </div>
+          <div className="flex justify-between font-semibold">
+            <div>قابل پرداخت</div>
+            <div>{formatToman(total)}</div>
+          </div>
+
+          <div className="flex gap-2 mt-4">
+            <button type="submit" className="flex-1 py-2 bg-indigo-600 text-white rounded">تایید و ثبت سفارش</button>
+            <button type="button" onClick={() => setCheckoutOpen(false)} className="py-2 px-3 border rounded">انصراف</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  )}
+
+  <footer className="mt-12 py-6 text-center text-sm text-gray-500">© {new Date().getFullYear()} فروشگاه شما — طراحی شده با ❤️</footer>
+</div>
+
+); }
