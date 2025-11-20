@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 
-const sampleProducts = [ { id: 'p1', name: 'محصول شماره ۱', price: 199000, desc: 'توضیح کوتاه درباره محصول اول. کیفیت بالا و ارسال سریع.', image: 'https://images.unsplash.com/photo-1600180758890-2d4f9d7a9f2f?auto=format&fit=crop&w=800&q=60' }, { id: 'p2', name: 'محصول شماره ۲', price: 349000, desc: 'محصولی محبوب با طراحی مدرن.', image: 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=800&q=60' }, { id: 'p3', name: 'محصول شماره ۳', price: 89000, desc: 'گزینه اقتصادی با کیفیت مطلوب.', image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=60' } ];
+ ];
 
 function formatToman(n) { return n.toLocaleString('fa-IR') + ' تومان'; }
 
