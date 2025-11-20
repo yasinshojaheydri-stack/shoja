@@ -138,3 +138,10 @@ return ( <div className="min-h-screen bg-gray-50 text-gray-800"> <header classNa
 </div>
 
 ); }
+Add: هولدر مکانیکی 360 درجه (product p4){
+  id: 'p4',
+  name: 'هولدر مکانیکی 360 درجه جرثقیلی',
+  price: 365000,
+  desc: 'هولدر مکانیکی چرخان ۳۶۰ درجه، مناسب استفاده در تمام خودروها — نصب آسان و نگهداری مطمئن.',
+  image: 'https://cdnfa.com/ghaemmobile/0097f02/files/9714656.jpg'
+},
